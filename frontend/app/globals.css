@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fondo cute oscuro */
+/*body {
+  background: linear-gradient(135deg, #0a0a0a, #111);
+}*/
+
+/* Bordes rositas aesthetic */
+/*.cute-card {
+  @apply rounded-2xl border-4 border-pink-500 shadow-xl p-6;
+}*/
