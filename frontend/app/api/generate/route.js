@@ -11,7 +11,7 @@ export async function POST(req) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ inputs: prompt }),
-    }
+    },
   );
 
   const translationData = await translationResponse.json();
@@ -34,14 +34,13 @@ export async function POST(req) {
           height: 512,
         },
       }),
-    }
+    },
   );
 
   const imageBuffer = await imageResponse.arrayBuffer();
   const base64 = Buffer.from(imageBuffer).toString("base64");
 
-  return new Response(
-    JSON.stringify({ image: `data:image/png;base64,${base64}` }),
-    { headers: { "Content-Type": "application/json" } }
-  );
+  return new Response(JSON.stringify({ image: base64 }), {
+    headers: { "Content-Type": "application/json" },
+  });
 }
