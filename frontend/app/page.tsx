@@ -62,8 +62,13 @@ export default function Home() {
 
       const data = await res.json();
 
-      if (data.images) {
+      // 🔥 Soporta ambos formatos (image o images)
+      if (data.images && Array.isArray(data.images)) {
         setImages(data.images);
+      } else if (data.image) {
+        setImages([data.image]); // lo convertimos en array
+      } else {
+        console.error("Formato inesperado:", data);
       }
     } catch (error) {
       console.error("Error:", error);
