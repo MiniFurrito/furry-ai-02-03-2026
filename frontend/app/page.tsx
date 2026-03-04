@@ -42,7 +42,7 @@ export default function Home() {
     setImages(Array(numImages).fill(""));
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/generate", {
+      const res = await fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -159,7 +159,8 @@ export default function Home() {
             <div
               key={index}
               // Hace que la IA genere la imagen en un tamaño específico, el siguiente hace que el cuadro tenga el tamaño necesario:  className="w-80 h-80 bg-gray-800 rounded shadow-lg flex items-center justify-center overflow-hidden"
-              className="max-w-md bg-gray-800 rounded shadow-lg flex items-center justify-center p-2"
+              // className="max-w-md bg-gray-800 rounded shadow-lg flex items-center justify-center p-2"
+              className="w-80 h-80 bg-gray-800 rounded shadow-lg flex items-center justify-center overflow-hidden"
             >
               {img ? (
                 <img
