@@ -7,9 +7,9 @@ export async function POST(req) {
     });
   }
 
-  /* 1️⃣ Traducir prompt (modelo gratuito HF) */
+  /* 1️⃣ Traducir prompt */
   const translationResponse = await fetch(
-    "https://api-inference.huggingface.co/models/Helsinki-NLP/opus-mt-es-en",
+    "https://router.huggingface.co/hf-inference/models/Helsinki-NLP/opus-mt-es-en",
     {
       method: "POST",
       headers: {
@@ -23,9 +23,9 @@ export async function POST(req) {
   const translationData = await translationResponse.json();
   const translatedPrompt = translationData[0]?.translation_text || prompt;
 
-  /* 2️⃣ Generar imagen con SD-Turbo */
+  /* 2️⃣ Generar imagen */
   const imageResponse = await fetch(
-    "https://api-inference.huggingface.co/models/stabilityai/sd-turbo",
+    "https://router.huggingface.co/hf-inference/models/stabilityai/sd-turbo",
     {
       method: "POST",
       headers: {
@@ -43,19 +43,15 @@ export async function POST(req) {
     },
   );
 
-  // 🔥 Manejo real de errores
   if (!imageResponse.ok) {
     const errorText = await imageResponse.text();
-    console.error("HF Error:", errorText);
     return new Response(JSON.stringify({ error: errorText }), { status: 500 });
   }
 
-  // 🔥 Verificar que realmente sea imagen
   const contentType = imageResponse.headers.get("content-type");
 
   if (!contentType || !contentType.includes("image")) {
     const errorText = await imageResponse.text();
-    console.error("No es imagen:", errorText);
     return new Response(
       JSON.stringify({
         error: "HF no devolvió una imagen válida",
@@ -68,8 +64,7 @@ export async function POST(req) {
   const imageBuffer = await imageResponse.arrayBuffer();
   const base64 = Buffer.from(imageBuffer).toString("base64");
 
-  return new Response(
-    JSON.stringify({ image: base64 }), // 🔥 SOLO base64 puro
-    { headers: { "Content-Type": "application/json" } },
-  );
+  return new Response(JSON.stringify({ image: base64 }), {
+    headers: { "Content-Type": "application/json" },
+  });
 }
