@@ -70,7 +70,6 @@ export default function Home() {
       } else {
         console.error("Formato inesperado:", data);
       }
-
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -83,6 +82,24 @@ export default function Home() {
       <h1 className="text-4xl font-bold text-pink-400 drop-shadow-lg">
         Cute Furry AI 🐾
       </h1>
+
+      <div className="flex gap-4 flex-wrap justify-center">
+        <button className="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded shadow-lg transition hover:scale-105">
+          🎥 Video Generator 1
+        </button>
+        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded shadow-lg transition hover:scale-105">
+          🎬 Video Generator 2
+        </button>
+        <button className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded shadow-lg transition hover:scale-105">
+          🖼️ Image Descriptor
+        </button>
+        <button className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 rounded shadow-lg transition hover:scale-105">
+          ✏️ Image Modifier
+        </button>
+        <button className="px-4 py-2 bg-pink-600 hover:bg-pink-500 rounded shadow-lg transition hover:scale-105">
+          💬 AI Chat
+        </button>
+      </div>
 
       {/* Prompt */}
       <input
@@ -107,9 +124,7 @@ export default function Home() {
               alt={option.label}
               className="w-full h-32 object-cover"
             />
-            <div className="text-center py-2 bg-gray-900">
-              {option.label}
-            </div>
+            <div className="text-center py-2 bg-gray-900">{option.label}</div>
           </div>
         ))}
       </div>
