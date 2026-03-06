@@ -1,4 +1,4 @@
-export async function POST(req) {
+/*export async function POST(req) {
   try {
     const { prompt, style, negative_prompt, num_images } = await req.json();
 
@@ -73,4 +73,47 @@ export async function POST(req) {
       { status: 500 }
     );
   }
+}*/
+export async function POST(req) {
+
+  const { prompt, num_images = 1 } = await req.json();
+
+  const images = [];
+
+  for (let i = 0; i < num_images; i++) {
+
+    const response = await fetch(
+      "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-dev",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.HF_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: prompt
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return new Response(
+        JSON.stringify({ error: errorText }),
+        { status: 500 }
+      );
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString("base64");
+
+    images.push(base64);
+  }
+
+  return new Response(
+    JSON.stringify({ images }),
+    {
+      headers: { "Content-Type": "application/json" }
+    }
+  );
 }
