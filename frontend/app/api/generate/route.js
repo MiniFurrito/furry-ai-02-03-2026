@@ -77,13 +77,11 @@
 export const runtime = "nodejs";
 
 export async function POST(req) {
-
   const { prompt, num_images = 1 } = await req.json();
 
   const images = [];
 
   for (let i = 0; i < num_images; i++) {
-
     const response = await fetch(
       "https://router.huggingface.co/hf-inference/models/stabilityai/sd-turbo",
       {
@@ -95,18 +93,17 @@ export async function POST(req) {
         body: JSON.stringify({
           inputs: prompt,
           options: {
-            wait_for_model: true
-          }
+            wait_for_model: true,
+          },
         }),
-      }
+      },
     );
 
     if (!response.ok) {
       const errorText = await response.text();
-      return new Response(
-        JSON.stringify({ error: errorText }),
-        { status: 500 }
-      );
+      return new Response(JSON.stringify({ error: errorText }), {
+        status: 500,
+      });
     }
 
     const arrayBuffer = await response.arrayBuffer();
@@ -116,10 +113,7 @@ export async function POST(req) {
     images.push(base64);
   }
 
-  return new Response(
-    JSON.stringify({ images }),
-    {
-      headers: { "Content-Type": "application/json" }
-    }
-  );
-} 
+  return new Response(JSON.stringify({ images }), {
+    headers: { "Content-Type": "application/json" },
+  });
+}
