@@ -75,15 +75,13 @@
   }
 }*/
 export async function POST(req) {
-
   const { prompt, num_images = 1 } = await req.json();
 
   const images = [];
 
   for (let i = 0; i < num_images; i++) {
-
     const response = await fetch(
-      "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-dev",
+      "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-dev",
       {
         method: "POST",
         headers: {
@@ -91,17 +89,19 @@ export async function POST(req) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          inputs: prompt
+          inputs: prompt,
+          options: {
+            wait_for_model: true,
+          },
         }),
-      }
+      },
     );
 
     if (!response.ok) {
       const errorText = await response.text();
-      return new Response(
-        JSON.stringify({ error: errorText }),
-        { status: 500 }
-      );
+      return new Response(JSON.stringify({ error: errorText }), {
+        status: 500,
+      });
     }
 
     const arrayBuffer = await response.arrayBuffer();
@@ -110,10 +110,7 @@ export async function POST(req) {
     images.push(base64);
   }
 
-  return new Response(
-    JSON.stringify({ images }),
-    {
-      headers: { "Content-Type": "application/json" }
-    }
-  );
+  return new Response(JSON.stringify({ images }), {
+    headers: { "Content-Type": "application/json" },
+  });
 }
