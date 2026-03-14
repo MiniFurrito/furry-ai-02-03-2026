@@ -84,7 +84,8 @@ export async function POST(req) {
   for (let i = 0; i < num_images; i++) {
     const response = await fetch(
       //"https://router.huggingface.co/hf-inference/models/stabilityai/sd-turbo",
-      "https://api-inference.huggingface.co/models/stabilityai/sd-turbo",
+      //"https://api-inference.huggingface.co/models/stabilityai/sd-turbo",
+      "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1",
       {
         method: "POST",
         headers: {
