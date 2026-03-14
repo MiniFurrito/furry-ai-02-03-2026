@@ -19,25 +19,25 @@ export async function POST(req) {
       );
     }
 
-    // Tu Space (ya despierto la primera vez que lo visites)
+    // Tu Space (lo despertamos automáticamente)
     const app = await Client.connect(
-      "https://minifurrito-furry-ai-02-03-2026.hf.space/",
+      "https://minifurrito-furry-ai-02-03-2026.hf.space",
     );
 
     const images = [];
 
     for (let i = 0; i < num_images; i++) {
       const result = await app.predict("/predict", [
-        `${style} furry, ${prompt}`, // ← "Describe tu imagen"
-        style, // ← "Estilo"
-        // Si más adelante agregas negative_prompt en tu Space, ponlo aquí como tercer parámetro
+        `${style} furry, ${prompt}`, // Campo 1: Describe tu imagen
+        style, // Campo 2: Estilo
+        negative_prompt || "blurry, bad anatomy, deformed", // Campo 3: Negative Prompt (¡esto arregla el error!)
       ]);
 
-      // Convertimos la imagen a base64 (exactamente como esperaba tu frontend)
-      let imageData = result.data[0];
-      if (imageData?.url) imageData = imageData.url;
+      // Convertimos la imagen a base64 (funciona con casi todos los Spaces)
+      let imageUrl = result.data[0];
+      if (imageUrl?.url) imageUrl = imageUrl.url;
 
-      const res = await fetch(imageData);
+      const res = await fetch(imageUrl);
       const arrayBuffer = await res.arrayBuffer();
       const base64 = `data:image/png;base64,${Buffer.from(arrayBuffer).toString("base64")}`;
 
@@ -46,11 +46,12 @@ export async function POST(req) {
 
     return new Response(JSON.stringify({ images }), { status: 200 });
   } catch (error) {
-    console.error("❌ Error Space:", error.message);
+    console.error("❌ Error completo:", error.message);
     return new Response(
       JSON.stringify({
-        error:
-          "Error al conectar con tu Space. Visítalo primero para despertarlo: https://huggingface.co/spaces/MiniFurrito/furry-ai-02_03_2026",
+        error: error.message.includes("negative")
+          ? "Error en negative prompt del Space. Abre tu Space y corrígelo (o usa el código de 'Use via API')"
+          : "Error al conectar con tu Space",
       }),
       { status: 500 },
     );
