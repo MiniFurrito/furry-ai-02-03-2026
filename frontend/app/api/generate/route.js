@@ -74,7 +74,7 @@
     );
   }
 }*/
-export const runtime = "nodejs";
+/*export const runtime = "nodejs";
 
 export async function POST(req) {
   const { prompt, num_images = 1 } = await req.json();
@@ -125,4 +125,44 @@ export async function POST(req) {
   return new Response(JSON.stringify({ images }), {
     headers: { "Content-Type": "application/json" },
   });
-}
+}*/
+
+export const runtime = "nodejs";
+
+export async function POST(req) {
+
+  const { prompt, style, negative_prompt = "", num_images = 1 } = await req.json();
+
+  const images = [];
+
+  for (let i = 0; i < num_images; i++) {
+
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/stabilityai/sd-turbo",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.HF_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: `${style} furry, ${prompt}`,
+          parameters: {
+            negative_prompt: `blurry, bad anatomy, extra limbs, extra fingers, deformed hands, ${negative_prompt}`
+          },
+          options: { wait_for_model: true }
+        }),
+      }
+    );
+
+    if (!response.ok) {
+
+      const errorText = await response.text();
+      console.error("HF ERROR:", errorText);
+
+      return new Response(JSON.stringify({ error: errorText }), {
+        status: 500,
+      });
+
+    }
+  }}
