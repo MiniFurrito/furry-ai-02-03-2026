@@ -16,7 +16,7 @@ export async function POST(req) {
     }
 
     const app = await Client.connect(
-      "https://minifurrito-furry-ai-02-03-2026.hf.space/",
+      "https://minifurrito-furry-ai-02-03-2026.hf.space/?",
     );
 
     const imagePromises = Array.from(
@@ -57,3 +57,9 @@ export async function POST(req) {
     );
   }
 }
+
+/* Comando para actualizar a Vercel:
+git add .
+git commit -m "Algo random"
+git push
+ */
