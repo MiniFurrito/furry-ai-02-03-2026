@@ -16,7 +16,7 @@ export async function POST(req) {
     }
 
     const app = await Client.connect(
-      "https://minifurrito-furry-ai-02-03-2026.hf.space/?",
+      "https://minifurrito-furry-ai-02-03-2026.hf.space/",
     );
 
     const imagePromises = Array.from(
@@ -24,20 +24,15 @@ export async function POST(req) {
       async (_, i) => {
         console.log(`Generando imagen ${i + 1} de ${num_images}`);
 
-        // ← CAMBIO CLAVE: usamos el api_name que pusimos en app.py
-        const result = await app.predict("generate", [
-          prompt,
-          style,
-          negative_prompt,
-        ]);
+        // ← SOLO 2 PARÁMETROS (esto hace que deje de dar 500)
+        const result = await app.predict("/predict", [prompt, style]);
 
         let imageData = result.data?.[0];
         if (imageData?.url) imageData = imageData.url;
-        if (!imageData)
-          throw new Error("No se encontró imagen en la respuesta");
+        if (!imageData) throw new Error("No se encontró imagen");
 
         const res = await fetch(imageData);
-        if (!res.ok) throw new Error(`Error descargando imagen: ${res.status}`);
+        if (!res.ok) throw new Error(`Error descargando: ${res.status}`);
 
         const arrayBuffer = await res.arrayBuffer();
         return `data:image/png;base64,${Buffer.from(arrayBuffer).toString("base64")}`;
@@ -48,13 +43,10 @@ export async function POST(req) {
 
     return new Response(JSON.stringify({ images }), { status: 200 });
   } catch (error) {
-    console.error("Error en /api/generate:", error.message);
-    return new Response(
-      JSON.stringify({
-        error: `Error al generar: ${error.message}. Prueba visitar el Space primero: https://minifurrito-furry-ai-02-03-2026.hf.space`,
-      }),
-      { status: 500 },
-    );
+    console.error("Error:", error.message);
+    return new Response(JSON.stringify({ error: `Error: ${error.message}` }), {
+      status: 500,
+    });
   }
 }
 
