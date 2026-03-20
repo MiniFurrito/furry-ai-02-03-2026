@@ -5,12 +5,8 @@ import { Client } from "@gradio/client";
 
 export async function POST(req) {
   try {
-    const {
-      prompt,
-      style,
-      negative_prompt = "",
-      num_images = 1,
-    } = await req.json();
+    const body = await req.json();
+    const { prompt, style, negative_prompt = "", num_images = 1 } = body;
 
     if (!prompt || !style) {
       return new Response(
@@ -19,39 +15,43 @@ export async function POST(req) {
       );
     }
 
-    // Tu Space (lo despertamos automáticamente)
     const app = await Client.connect(
-      "https://minifurrito-furry-ai-02-03-2026.hf.space",
+      "https://minifurrito-furry-ai-02-03-2026.hf.space/",
     );
 
-    const images = [];
+    const imagePromises = Array.from(
+      { length: Math.min(Number(num_images), 4) },
+      async (_, i) => {
+        console.log(`Generando imagen ${i + 1} de ${num_images}`);
 
-    for (let i = 0; i < num_images; i++) {
-      const result = await app.predict("/predict", [
-        `${style} furry, ${prompt}`, // Campo 1: Describe tu imagen
-        style, // Campo 2: Estilo
-        negative_prompt || "blurry, bad anatomy, deformed", // Campo 3: Negative Prompt (¡esto arregla el error!)
-      ]);
+        // ← CAMBIO CLAVE: usamos el api_name que pusimos en app.py
+        const result = await app.predict("generate", [
+          prompt,
+          style,
+          negative_prompt,
+        ]);
 
-      // Convertimos la imagen a base64 (funciona con casi todos los Spaces)
-      let imageUrl = result.data[0];
-      if (imageUrl?.url) imageUrl = imageUrl.url;
+        let imageData = result.data?.[0];
+        if (imageData?.url) imageData = imageData.url;
+        if (!imageData)
+          throw new Error("No se encontró imagen en la respuesta");
 
-      const res = await fetch(imageUrl);
-      const arrayBuffer = await res.arrayBuffer();
-      const base64 = `data:image/png;base64,${Buffer.from(arrayBuffer).toString("base64")}`;
+        const res = await fetch(imageData);
+        if (!res.ok) throw new Error(`Error descargando imagen: ${res.status}`);
 
-      images.push(base64);
-    }
+        const arrayBuffer = await res.arrayBuffer();
+        return `data:image/png;base64,${Buffer.from(arrayBuffer).toString("base64")}`;
+      },
+    );
+
+    const images = await Promise.all(imagePromises);
 
     return new Response(JSON.stringify({ images }), { status: 200 });
   } catch (error) {
-    console.error("❌ Error completo:", error.message);
+    console.error("Error en /api/generate:", error.message);
     return new Response(
       JSON.stringify({
-        error: error.message.includes("negative")
-          ? "Error en negative prompt del Space. Abre tu Space y corrígelo (o usa el código de 'Use via API')"
-          : "Error al conectar con tu Space",
+        error: `Error al generar: ${error.message}. Prueba visitar el Space primero: https://minifurrito-furry-ai-02-03-2026.hf.space`,
       }),
       { status: 500 },
     );
