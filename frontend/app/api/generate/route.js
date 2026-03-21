@@ -24,7 +24,7 @@ export async function POST(req) {
       async (_, i) => {
         console.log(`Generando imagen ${i + 1} de ${num_images}`);
 
-        // ← ESTA ES LA LÍNEA CLAVE (usa "generate" como en tu app.py)
+        // ← Llamada correcta al endpoint que tiene tu Space ahora
         const result = await app.predict("generate", [
           prompt,
           style,
@@ -33,8 +33,7 @@ export async function POST(req) {
 
         let imageData = result.data?.[0];
         if (imageData?.url) imageData = imageData.url;
-        if (!imageData)
-          throw new Error("No se encontró imagen en la respuesta");
+        if (!imageData) throw new Error("No se encontró imagen");
 
         const res = await fetch(imageData);
         if (!res.ok) throw new Error(`Error descargando: ${res.status}`);
@@ -48,13 +47,10 @@ export async function POST(req) {
 
     return new Response(JSON.stringify({ images }), { status: 200 });
   } catch (error) {
-    console.error("❌ Error completo en /api/generate:", error.message);
-    return new Response(
-      JSON.stringify({
-        error: `Error al generar: ${error.message || "desconocido"}. Prueba visitar el Space primero: https://minifurrito-furry-ai-02-03-2026.hf.space`,
-      }),
-      { status: 500 },
-    );
+    console.error("❌ Error completo:", error.message);
+    return new Response(JSON.stringify({ error: `Error: ${error.message}` }), {
+      status: 500,
+    });
   }
 }
 
