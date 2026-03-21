@@ -1,4 +1,5 @@
 // app/api/generate/route.js
+// TEST - nuevo deployment forzado
 export const runtime = "nodejs";
 
 import { Client } from "@gradio/client";
